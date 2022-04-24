@@ -3,6 +3,10 @@ Powershell script to query Atera's ticket syetem. It will text ticket informatio
 
 Utilizes Atera's API, Twilio API, and TinyURL API.
 
+# Special Thanks
+David Long for creating PSAtera, an easy to use module for utilizing the Atera API.
+https://github.com/davejlong/PSAtera
+
 # Requirements
 Your Atera API key
 https://support.atera.com/hc/en-us/articles/219083397-APIs
