@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.10] - 2022-04-24
+## [2.1.0] - 2022-04-24
 ### Added
 - Added settings tab to GUI
 - Added ability to save and load config from AppData
