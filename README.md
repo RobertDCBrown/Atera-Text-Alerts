@@ -15,7 +15,9 @@ The PSAtera module
 
 # Configuration
 On first launch, go to the settings tab and configure your Atera API key, Twilio Token, Twilio SID, Twilio Number. Format of number is +12223334444
+
 Add you on-call techs to the list. Format for cell phone is +12223334444 (Change country code as needed)
+
 Set your refresh rate to check Atera for new tickets. (Default: 5 minutes, Minimum: 1 minute)
 
 # Optional
