@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.1] - 2022-04-24
+### Fixed
+- Fixed bug in which Last Tech on call would result in a blank name.
+
+## [Released]
+
 ## [2.1.0] - 2022-04-24
 ### Added
 - Added settings tab to GUI
