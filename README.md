@@ -14,13 +14,13 @@ The PSAtera module
 ```PS> Install-Module -Name PSAtera```
 
 # Configuration
-On first launch, go to the settings tab and configure your Atera API key, Twilio Token, Twilio SID, Twilio Number. (format is +12223334444)
-Add you on-call techs to the list. (format for cell phone is +12223334444)
+On first launch, go to the settings tab and configure your Atera API key, Twilio Token, Twilio SID, Twilio Number. Format of number is +12223334444
+Add you on-call techs to the list. Format for cell phone is +12223334444 (Change country code as needed)
 Set your refresh rate to check Atera for new tickets. (Default: 5 minutes, Minimum: 1 minute)
 
-# Optional Recommendations
+# Optional
 
-If downloading the source .ps1 file, compile to an EXE using PS2Exe
+If downloading the source .ps1 file, compile to an EXE using PS2Exe. I find this to be the best.
 ```ps2exe "<path of ps1 file.ps1>" "<destination of exe.exe>"```
 
-Add .exe to startup directory or task scheduler so it is always running.
+Add .exe to startup directory or task scheduler so it is always running at login.
