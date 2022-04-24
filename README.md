@@ -26,7 +26,8 @@ Set your refresh rate to check Atera for new tickets. (Default: 5 minutes, Minim
 
 # Optional
 
-If downloading the source .ps1 file, compile to an EXE using PS2Exe. I find this to be the best.
+If downloading the source .ps1 file, compile to an EXE using PS2Exe. I find this to be the best way to run.
+
 ```ps2exe "<path of ps1 file.ps1>" "<destination of exe.exe>"```
 
 Add .exe to startup directory or task scheduler so it is always running at login.
