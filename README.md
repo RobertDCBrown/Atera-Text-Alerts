@@ -1,5 +1,5 @@
 # Atera-Text-Alerts
-Powershell script to query Atera's ticket syetem. It will text ticket information to the on-call technician if a ticket comes in after hours.
+Powershell script to query Atera's ticket syetem. It will text ticket information to the on-call technician if a ticket comes in after hours. Business hours are defined by you.
 
 Utilizes Atera's API, Twilio API, and TinyURL API. All required.
 
