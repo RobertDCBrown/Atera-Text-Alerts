@@ -10,7 +10,8 @@ https://support.atera.com/hc/en-us/articles/219083397-APIs
 A Twilio account with a phone number. I use the "Pay as you Go" plan and add $20 when I need to.
 
 The PSAtera module
-PS> Install-Module -Name PSAtera
+
+```PS> INstall-Module -Name PSAtera```
 
 # Configuration
 On first launch, go to the settings tab and configure your Atera API key, Twilio Token, Twilio SID, Twilio Number. (format is +12223334444)
