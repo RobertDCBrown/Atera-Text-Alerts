@@ -1,7 +1,7 @@
 <################################################################################ 
 
   Name    : Atera - On Call Text Alerts
-  Version : 0.2
+  Version : 2.1.0
   Author  : Robert Brown
   Email   : robertdcbrown@gmail.com
   Date    : 4/20/2022
