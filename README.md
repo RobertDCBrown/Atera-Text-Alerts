@@ -31,3 +31,8 @@ If downloading the source .ps1 file, compile to an EXE using PS2Exe. I find this
 ```ps2exe "<path of ps1 file.ps1>" "<destination of exe.exe>"```
 
 Add .exe to startup directory or task scheduler so it is always running at login.
+
+# Screenshots
+
+![alt text](https://imgur.com/a/4eQ5jM4)
+
