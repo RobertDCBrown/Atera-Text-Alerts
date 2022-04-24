@@ -1,13 +1,12 @@
-################################################################################ 
-#
-#  Name    : Atera - On Call Text Alerts
-#  Version : 0.2
-#  Author  : Robert Brown
-#  Email   : robertdcbrown@gmail.com
-#  Date    : 4/20/2022
-#
-#
-################################################################################
+<################################################################################ 
+
+  Name    : Atera - On Call Text Alerts
+  Version : 0.2
+  Author  : Robert Brown
+  Email   : robertdcbrown@gmail.com
+  Date    : 4/20/2022
+  
+################################################################################>
 
 ### Loading external assemblies ###
 Add-Type -AssemblyName System.Windows.Forms
