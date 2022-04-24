@@ -34,5 +34,7 @@ Add .exe to startup directory or task scheduler so it is always running at login
 
 # Screenshots
 
+![alt text](https://i.imgur.com/3DSiw6G.png)
+
 ![alt text](https://i.imgur.com/JGSDL1r.png)
 
