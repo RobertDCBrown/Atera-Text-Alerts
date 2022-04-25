@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.0] - 2022-04-10
 ### Added
-- Implemented first versin of GUI, settings still updated by modifying PS1 file.
+- Implemented first version of GUI, settings still updated by modifying PS1 file.
 
 ## [1.0.0] - 2022-04-03
 ### Added
