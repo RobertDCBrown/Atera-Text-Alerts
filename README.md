@@ -1,3 +1,5 @@
+<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="Cidks7T2sy" data-color="#5F7FFF" data-emoji="🍺"  data-font="Cookie" data-text="Buy me a beer" data-outline-color="#000000" data-font-color="#ffffff" data-coffee-color="#FFDD00" ></script>
+
 # Atera-Text-Alerts
 Powershell script with WinForms GUI to query Atera's ticket syetem. It will text ticket information to the on-call technician if a ticket comes in after hours. Business hours are defined by you.
 
