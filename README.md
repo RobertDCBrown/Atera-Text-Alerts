@@ -1,3 +1,5 @@
+[![name](https://cdn.buymeacoffee.com/buttons/v2/default-blue.png)](https://www.buymeacoffee.com/Cidks7T2sy)
+
 # Atera-Text-Alerts
 Powershell script with WinForms GUI to query Atera's ticket syetem. It will text ticket information to the on-call technician if a ticket comes in after hours. Business hours are defined by you.
 
