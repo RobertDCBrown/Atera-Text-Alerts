@@ -1,12 +1,14 @@
-<################################################################################ 
-
-  Name    : Atera - On Call Text Alerts
-  Version : 2.1.0
-  Author  : Robert Brown
-  Email   : robertdcbrown@gmail.com
-  Date    : 4/20/2022
-  
-################################################################################>
+################################################################################ 
+#
+#  Name    : Atera - On Call Text Alerts
+#  Version : 2.1.2
+#  Author  : Robert Brown
+#  Email   : robertdcbrown@gmail.com
+#  Date    : 4/24/2022
+#
+#  PowerShell version 5.1.22598.1
+#
+################################################################################
 
 ### Loading external assemblies ###
 Add-Type -AssemblyName System.Windows.Forms
@@ -18,6 +20,14 @@ public static extern IntPtr GetConsoleWindow();
 [DllImport("user32.dll")]
 public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow);
 '
+
+if (Get-Module -ListAvailable -Name PSAtera) {
+    $PSAtera = 1
+} 
+else {
+    $PSAtera = 0
+}
+
 
 
 ### Definitons ###
@@ -49,6 +59,7 @@ $button_save = New-Object System.Windows.Forms.Button
 $txt_IsItOnCall = New-Object System.Windows.Forms.TextBox
 $label4 = New-Object System.Windows.Forms.Label
 $txt_onCallTech = New-Object System.Windows.Forms.TextBox
+$txt_PSAtera = New-Object System.Windows.Forms.TextBox
 $label5 = New-Object System.Windows.Forms.Label
 $progressBar1 = New-Object System.Windows.Forms.ProgressBar
 $label6 = New-Object System.Windows.Forms.Label
@@ -431,8 +442,18 @@ Function SendText{
     $credential = New-Object System.Management.Automation.PSCredential($sid, $p)
 
     # Make API request, selecting JSON properties from response
-    Invoke-WebRequest $url -Method Post -Credential $credential -Body $params -UseBasicParsing |
-    ConvertFrom-Json | Select sid, body
+
+    try { Invoke-WebRequest $url -Method Post -Credential $credential -Body $params -UseBasicParsing |
+        ConvertFrom-Json | Select sid, body
+    }
+    catch {
+        $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
+        $txt_console.AppendText("$logDate - Sending text failed, is your API set correctly?`r`n")   
+        $button_start.Enabled   = $true
+        $button_stop.Enabled   = $false
+        StopTimer
+        StopTimer2
+    }
 }
 
 function startTimer { 
@@ -577,6 +598,7 @@ function SaveConfig {
 
 
 Function LoadConfig {
+    $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
     $txt_console.AppendText("$logDate - Loading Config File ($FullConfigPath)`r`n")
     $Config = Get-Content -Path "$FullConfigPath"
 
@@ -695,7 +717,6 @@ Function LoadConfig {
         $dataGridView2.Refresh();
     }
     Set-AteraAPIKey "$AteraAPIKey"
-
 }
 
 Function AutoRun {
@@ -707,9 +728,8 @@ Function AutoRun {
     If ($AutoRunStatus -eq 1){
         $CB_onCallTech.Text = "$LastTech"
         $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
+        $txt_console.AppendText("$logDate - Auto start enabled - starting script`r`n")
         $txt_console.AppendText("$logDate - LastTech was $LastTech`r`n")
-
-        $txt_console.AppendText("Starting Script`r`n")
         $button_stop.Enabled   = $true
         $button_start.Enabled   = $false
         UpdateOnCallTech
@@ -717,7 +737,10 @@ Function AutoRun {
         IsItOnCall
         startTimer
         startTimer2
-
+    }
+    Else {
+        $button_stop.Enabled   = $false
+        $button_start.Enabled   = $true
     }
 
 }
@@ -756,7 +779,6 @@ $timer.add_tick({
     $tech = $techAndPhone.Split("-")[0]
     $techPhone = $techAndPhone.Split("-")[1]
 
-    $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
     $holiday = ForceHoliday
     $NewTicket = 0
     $csvdata = Import-Csv "$FullLogPath"
@@ -772,9 +794,22 @@ $timer.add_tick({
     }
 
     #Get Last Ticket from Atera
+    $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
     $txt_console.AppendText("$logDate - Getting last ticket from Atera`r`n")
-    $OpenTickets = Get-AteraTickets -Open
+    $error.clear()
+    try { $OpenTickets = Get-AteraTickets -Open }
+    catch {
+        $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
+        $txt_console.AppendText("$logDate - Fetching Atera Tickets failed, is your API set correctly?`r`n")   
+        $button_start.Enabled   = $true
+        $button_stop.Enabled   = $false
+        StopTimer
+        StopTimer2
+    }
+
+
     if ($OpenTickets -eq $null){
+        $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
         $txt_console.AppendText("$logDate - No open tickets in Atera`r`n")
     }
     Else {
@@ -797,10 +832,12 @@ $timer.add_tick({
         #Compare ticket number to last ticket in CSV
         If ($TicketNumber -gt $csvTicket){
             $NewTicket = 1
+            $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
             $txt_console.AppendText("$logDate - ***New ticket***`r`n                   Client: $TicketCustomer`r`n                   Contact: $TicketContact`r`n                   Title: $TicketTitle`r`n")
             $txt_console.AppendText("$logDate - Checking if it is on call`r`n")
         }
         Else {
+            $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
             $txt_console.AppendText("$logDate - No new tickets found since last check`r`n")
         }
 
@@ -812,6 +849,7 @@ $timer.add_tick({
 
 
         If (($OnCall -eq 1) -and ($NewTicket -eq 1)){
+            $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
             $txt_console.AppendText("$logDate - On Call, preparing to alert on call tech`r`n")
 
             #Generate short URL
@@ -829,11 +867,13 @@ Link: $ShortURL"
 
 
             ### Send Text Message ###
+            $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
             $txt_console.AppendText("$logDate - Sending text to $tech for ticket # $TicketNumber`r`n")
 
             SendText -techPhone "$techphone" -body "$body"
         }
         elseIf (($OnCall -eq 0) -and ($NewTicket -eq 1)){
+            $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
             $txt_console.AppendText("$logDate - Not on call hours`r`n")
         }
 
@@ -866,6 +906,7 @@ $box_oncall.Controls.Add($label6)
 $box_oncall.Controls.Add($progressBar1)
 $box_oncall.Controls.Add($label5)
 $box_oncall.Controls.Add($txt_onCallTech)
+$box_oncall.Controls.Add($txt_PSAtera)
 $box_oncall.Controls.Add($label4)
 $box_oncall.Controls.Add($txt_IsItOnCall)
 $box_oncall.Controls.Add($button_save)
@@ -1317,7 +1358,11 @@ $button_save.Text = "Save"
 $button_save.UseVisualStyleBackColor = $true
 # I added this:
 $button_save.add_click({
+    $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
     $txt_console.AppendText("$logDate - Options Saved`r`n")
+    SaveConfig
+    LoadConfig
+    reload
     UpdateOnCallTech
     ForceHoliday
     IsItOnCall
@@ -1332,6 +1377,8 @@ $button_save2.Text = "Save"
 $button_save2.UseVisualStyleBackColor = $true
 # I added this:
 $button_save2.add_click({
+    $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
+    $txt_console.AppendText("$logDate - Config Saved`r`n")
     SaveConfig
     LoadConfig
     reload
@@ -1352,12 +1399,14 @@ $button_start.add_click({
     #If on tech field empty, return error
     $tech = $CB_onCallTech.SelectedItem
     if (!$tech){
-        $txt_console.AppendText("Please select an on-call technican first`r`n")
+        $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
+        $txt_console.AppendText("$logDate - Please select an on-call technican before starting`r`n")
     }
     Else{
-        $txt_console.AppendText("Starting Script`r`n")
-        $button_stop.Enabled   = $true
-        $button_start.Enabled   = $false
+        $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
+        $txt_console.AppendText("$logDate - Script Started`r`n")
+        $button_stop.Enabled  = $true
+        $button_start.Enabled  = $false
         UpdateOnCallTech
         ForceHoliday
         IsItOnCall
@@ -1376,7 +1425,8 @@ $button_stop.UseVisualStyleBackColor = $true
 # I added this:
 $button_stop.add_click({
     $main_loop = 0
-    $txt_console.AppendText("Script Stopped`r`n")
+    $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
+    $txt_console.AppendText("$logDate - Script Stopped`r`n")
     $button_start.Enabled   = $true
     $button_stop.Enabled   = $false
     StopTimer
@@ -1395,11 +1445,28 @@ $button_clear.UseVisualStyleBackColor = $true
 # I added this:
 $button_clear.add_click({
     #Function to clear Console TXT Box
+    $txt_console.Clear()
 })
 
 
 
 ### Text Boxes ###
+
+# txt_PSAtera
+$txt_PSAtera.Location = New-Object System.Drawing.Point(160, 140)
+$txt_PSAtera.Name = "txt_PSAtera"
+$txt_PSAtera.ReadOnly = $true
+$txt_PSAtera.Size = New-Object System.Drawing.Size(495, 20)
+$txt_PSAtera.TabIndex = 9
+$txt_PSAtera.Font = 'Segoe UI, 12pt, style=Bold, Italic'
+$txt_PSAtera.TextAlign = "Center"
+If ($PSAtera -eq 0){
+    $txt_PSAtera.Text = "PSAtera module not found, please install"
+}
+Else {
+    $txt_PSAtera.Visible = $false
+}
+
 
 # txt_console
 $txt_console.Location = New-Object System.Drawing.Point(7, 19)
@@ -1680,9 +1747,6 @@ $FMmain.Controls.Add($Main)
 $FMmain.Controls.Add($box_console)
 $FMmain.Name = "FMmain"
 $FMmain.Text = "Atera Ticket Text Alerts"
-
-
-
 
 ### Load Config ###
 
