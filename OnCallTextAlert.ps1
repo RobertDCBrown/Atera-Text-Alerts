@@ -1,12 +1,10 @@
 ################################################################################ 
 #
 #  Name    : Atera - On Call Text Alerts
-#  Version : 2.1.2
+#  Version : 2.3.0
 #  Author  : Robert Brown
 #  Email   : robertdcbrown@gmail.com
-#  Date    : 4/24/2022
-#
-#  PowerShell version 5.1.22598.1
+#  Date    : 4/20/2022
 #
 ################################################################################
 
@@ -31,6 +29,7 @@ else {
 
 
 ### Definitons ###
+$Version = "2.3.0"
 $AppDataFolder = "$env:APPDATA\AteraTXT"
 $ConfigFile = "ateraTXT.config"
 $TicketLogCSV = "ticketLog.csv"
@@ -44,6 +43,8 @@ $imageBytes = [Convert]::FromBase64String($base64ImageString)
 $ms = New-Object IO.MemoryStream($imageBytes, 0, $imageBytes.Length)
 $ms.Write($imageBytes, 0, $imageBytes.Length);
 $img = [System.Drawing.Image]::FromStream($ms, $true)
+$githubver = "https://raw.githubusercontent.com/RobertDCBrown/Atera-Text-Alerts/main/currentversion.txt"
+$updatefile = "TBD"
 
 
 $FMmain = New-Object System.Windows.Forms.Form
@@ -56,6 +57,7 @@ $label2 = New-Object System.Windows.Forms.Label
 $dataGridView1 = New-Object System.Windows.Forms.DataGridView
 $label3 = New-Object System.Windows.Forms.Label
 $button_save = New-Object System.Windows.Forms.Button
+$button_psatera = New-Object System.Windows.Forms.Button
 $txt_IsItOnCall = New-Object System.Windows.Forms.TextBox
 $label4 = New-Object System.Windows.Forms.Label
 $txt_onCallTech = New-Object System.Windows.Forms.TextBox
@@ -159,6 +161,23 @@ Function FirstRun {
         "Ticket Number,Ticket Title,Client,Contact,Ticket Created Date,Ticket Created Time,On Call Hours,On Call Tech" | add-content -path "$FullLogPath"
         "00000,Test Ticket,Test Client,Test Contact,2022-04-11,19:18:27,No,Stinky Pete" | add-content -path "$FullLogPath"
     }
+
+    ### Update Last 10 On Call Tickets ###
+    $dataGridView1.Rows.Clear();
+    $dataGridView1.Refresh();
+    $csvdata10 = Import-Csv "$FullLogPath"
+    $csvdata10 = $csvdata10 | Select-Object -Last 10
+    foreach ($csvTicket in $csvdata10){
+        $csvTicketNumber = $csvTicket.'Ticket Number'
+        $csvTicketTitle = $csvTicket.'Ticket Title'
+        $csvTicketClient = $csvTicket.'Client'
+        $csvTicketContact = $csvTicket.'Contact'
+        $csvTicketDate = $csvTicket.'Ticket Created Date'
+        $csvTicketTime = $csvTicket.'Ticket Created Time'
+        $csvTicketOnCall = $csvTicket.'On Call Hours'
+        $csvTicketTech = $csvTicket.'On Call Tech'
+        $dataGridView1.Rows.Add("$csvTicketNumber","$csvTicketTitle","$csvTicketClient","$csvTicketContact","$csvTicketDate","$csvTicketTime","$csvTicketOnCall","$csvTicketTech")
+    }
 }
 
 
@@ -207,6 +226,15 @@ function Reload {
 }
 
 
+function InstallPSAtera {
+    Start-Process Powershell -Verb runAs -ArgumentList {
+        Write-Host "Installing PSAtera Module, please wait..."
+        Install-Module -Name PSAtera -Force
+        Write-Host "PSAtera Installed"
+        pause
+
+    }
+}
 
 
 function UpdateOnCallTech {
@@ -745,6 +773,50 @@ Function AutoRun {
 
 }
 
+Function CheckforUpdates() {
+	$updateAvailable = $false
+	$nextVersion = $null
+    $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
+    $txt_console.AppendText("$logDate - Checking for Updates`r`n")
+	try{
+		$nextversion = (New-Object System.Net.WebClient).DownloadString($githubver).Trim([Environment]::NewLine)
+	}
+	catch [System.Exception] {
+		Write-Message $_ "debug"
+	}
+
+	if ($nextversion -ne $null -and $version -ne $nextversion){
+		#An update is most likely available, but make sure
+		$updateavailable = $false
+		$curr = $version.Split('.')
+		$next = $nextversion.Split('.')
+		for($i=0; $i -le ($curr.Count -1); $i++){
+			if ([int]$next[$i] -gt [int]$curr[$i]){
+				$updateavailable = $true
+                $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
+                $txt_console.AppendText("$logDate - Update $nextVersion available (Current version - $version)`r`n")
+                $txt_console.AppendText("$logDate - Please go to the settings page to update`r`n")
+   
+			}
+            else {
+                $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
+                $txt_console.AppendText("$logDate - No updates available (Current version - $version)`r`n")
+            }
+		}
+	}
+    else {
+        $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
+        $txt_console.AppendText("$logDate - No updates available (Current version - $version)`r`n")
+    }
+	return $updateavailable
+
+}
+
+Function Update {
+
+
+
+}
 
 
 ###################################################################################################################################
@@ -774,7 +846,6 @@ $timer.add_tick({
         $csvTicketTech = $csvTicket.'On Call Tech'
         $dataGridView1.Rows.Add("$csvTicketNumber","$csvTicketTitle","$csvTicketClient","$csvTicketContact","$csvTicketDate","$csvTicketTime","$csvTicketOnCall","$csvTicketTech")
     }
-
     $techAndPhone = UpdateOnCallTech
     $tech = $techAndPhone.Split("-")[0]
     $techPhone = $techAndPhone.Split("-")[1]
@@ -900,6 +971,7 @@ $box_console.Text = "Console"
 
 # box_oncall
 $box_oncall.Controls.Add($button_stop)
+$box_oncall.Controls.Add($button_psatera)
 $box_oncall.Controls.Add($button_start)
 $box_oncall.Controls.Add($pictureBox1)
 $box_oncall.Controls.Add($label6)
@@ -1358,8 +1430,6 @@ $button_save.Text = "Save"
 $button_save.UseVisualStyleBackColor = $true
 # I added this:
 $button_save.add_click({
-    $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
-    $txt_console.AppendText("$logDate - Options Saved`r`n")
     SaveConfig
     LoadConfig
     reload
@@ -1377,15 +1447,10 @@ $button_save2.Text = "Save"
 $button_save2.UseVisualStyleBackColor = $true
 # I added this:
 $button_save2.add_click({
-    $logDate = Get-Date -f "MM/dd/yyyy HH:mm"
-    $txt_console.AppendText("$logDate - Config Saved`r`n")
     SaveConfig
     LoadConfig
     reload
 })
-
-
-
 
 # button_start
 $button_start.Location = New-Object System.Drawing.Point(528, 51)
@@ -1433,7 +1498,20 @@ $button_stop.add_click({
     StopTimer2
 })
 
-
+# button_psatera
+$button_psatera.Location = New-Object System.Drawing.Point(665, 145)
+$button_psatera.Name = "button_psatera"
+$button_psatera.Size = New-Object System.Drawing.Size(75, 23)
+$button_psatera.TabIndex = 14
+$button_psatera.Text = "Install"
+$button_psatera.UseVisualStyleBackColor = $true
+$button_psatera.Visible = $false
+# I added this:
+$button_psatera.add_click({
+    InstallPSAtera
+    $txt_PSAtera.Visible = $false
+    $button_psatera.Visible = $false
+})
 
 # button_clear
 $button_clear.Location = New-Object System.Drawing.Point(700, 263)
@@ -1462,6 +1540,7 @@ $txt_PSAtera.Font = 'Segoe UI, 12pt, style=Bold, Italic'
 $txt_PSAtera.TextAlign = "Center"
 If ($PSAtera -eq 0){
     $txt_PSAtera.Text = "PSAtera module not found, please install"
+    $button_psatera.Visible = $true
 }
 Else {
     $txt_PSAtera.Visible = $false
@@ -1746,14 +1825,17 @@ $FMmain.ClientSize = New-Object System.Drawing.Size(853, 794)
 $FMmain.Controls.Add($Main)
 $FMmain.Controls.Add($box_console)
 $FMmain.Name = "FMmain"
-$FMmain.Text = "Atera Ticket Text Alerts"
+$FMmain.Text = "Atera Text Alerts - Version $Version"
 
-### Load Config ###
 
+
+
+### LET'S GO ###
 FirstRun
 LoadConfig
 reload
 Autorun
 Hide-Console
+$updateavailable = CheckforUpdates
 $FMmain.ShowDialog()
 
