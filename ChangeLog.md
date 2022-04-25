@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2022-04-25
+### Added
+- Compares version number to GitHub version and let's you know if an update is available.
+- Added ability to install PSAtera module if not installed.
+
+### Fixed
+- Ticket history not loading on startup
+
 ## [2.2.0] - 2022-04-24
 ### Added
 - Shows warning if PSAtera module is not installed.
